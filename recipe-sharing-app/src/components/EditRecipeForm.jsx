@@ -18,8 +18,8 @@ const EditRecipeForm = ({ id, onDone }) => {
     }
   }, [recipe])
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = (event) => {   // ✅ use "event"
+    event.preventDefault()            // ✅ explicit call
     updateRecipe(id, { title, description })
     onDone?.()
   }
