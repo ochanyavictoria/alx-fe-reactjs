@@ -1,23 +1,20 @@
-import { useState } from "react";
-import { advancedUserSearch } from "../services/githubService";
+import React, { useState } from "react";
+import { fetchUserData } from "../services/githubService";
 
 function Search() {
   const [username, setUsername] = useState("");
-  const [location, setLocation] = useState("");
-  const [minRepos, setMinRepos] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-    setResults([]);
+    setError(null);
 
     try {
-      const users = await advancedUserSearch({ username, location, minRepos });
-      setResults(users);
+      const data = await fetchUserData(username); // ✅ calling fetchUserData
+      setResults(data);
     } catch (err) {
       setError("Looks like we cant find the user");
     } finally {
@@ -26,89 +23,32 @@ function Search() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
-      <h1 className="text-2xl font-bold text-center mb-6">
-        GitHub User Search
-      </h1>
-
-      {/* Search Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-4 md:flex-row md:items-end md:justify-center"
-      >
-        <div className="flex flex-col w-full md:w-1/3">
-          <label className="text-sm font-medium mb-1">Username</label>
-          <input
-            type="text"
-            placeholder="Enter GitHub username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="p-2 border rounded-md"
-          />
-        </div>
-
-        <div className="flex flex-col w-full md:w-1/3">
-          <label className="text-sm font-medium mb-1">Location</label>
-          <input
-            type="text"
-            placeholder="Enter location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="p-2 border rounded-md"
-          />
-        </div>
-
-        <div className="flex flex-col w-full md:w-1/3">
-          <label className="text-sm font-medium mb-1">Min Repositories</label>
-          <input
-            type="number"
-            placeholder="e.g. 10"
-            value={minRepos}
-            onChange={(e) => setMinRepos(e.target.value)}
-            className="p-2 border rounded-md"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
-        >
+    <div className="p-4">
+      <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="Search GitHub user..."
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
           Search
         </button>
       </form>
 
-      {/* Conditional Rendering */}
-      <div className="mt-6">
-        {loading && <p className="text-center">Loading...</p>}
-        {error && <p className="text-center text-red-500">{error}</p>}
-        {results.length > 0 && (
-          <div className="grid gap-4">
-            {results.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center gap-4 p-4 border rounded-lg shadow-sm"
-              >
-                <img
-                  src={user.avatar_url}
-                  alt={user.login}
-                  className="w-16 h-16 rounded-full"
-                />
-                <div>
-                  <h2 className="text-lg font-semibold">{user.login}</h2>
-                  <a
-                    href={user.html_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    View Profile
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {loading && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+
+      {results && (
+        <div className="border p-4 rounded shadow">
+          <img src={results.avatar_url} alt={results.login} className="w-20 h-20 rounded-full" />
+          <h2 className="text-lg font-bold">{results.name || results.login}</h2>
+          <a href={results.html_url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+            View Profile
+          </a>
+        </div>
+      )}
     </div>
   );
 }
