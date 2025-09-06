@@ -9,8 +9,16 @@ export default function RegistrationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !email || !password) {
-      setError("All fields are required!");
+    if (!username) {
+      setError("Username is required");
+      return;
+    }
+    if (!email) {
+      setError("Email is required");
+      return;
+    }
+    if (!password) {
+      setError("Password is required");
       return;
     }
 
