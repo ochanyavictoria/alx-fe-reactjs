@@ -1,54 +1,100 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { fetchUserData } from "../services/githubService";
 
 function Search() {
   const [username, setUsername] = useState("");
-  const [results, setResults] = useState(null);
+  const [location, setLocation] = useState("");
+  const [minRepos, setMinRepos] = useState("");
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-
+    setError("");
     try {
-      const data = await fetchUserData(username); // ✅ calling fetchUserData
-      setResults(data);
+      const results = await fetchUserData(username, location, minRepos);
+      setUsers(results);
     } catch (err) {
-      setError("Looks like we cant find the user");
+      setError("Looks like we can't find any users");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-4">
-      <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+    <div className="max-w-2xl mx-auto p-4">
+      {/* Search Form */}
+      <form
+        onSubmit={handleSearch}
+        className="bg-white shadow-md rounded-xl p-6 mb-6 space-y-4"
+      >
+        <h2 className="text-xl font-semibold text-gray-700">
+          GitHub Advanced Search
+        </h2>
+
         <input
           type="text"
-          placeholder="Search GitHub user..."
+          placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="border p-2 rounded w-full"
+          className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
         />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+
+        <input
+          type="text"
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
+        />
+
+        <input
+          type="number"
+          placeholder="Minimum Repositories"
+          value={minRepos}
+          onChange={(e) => setMinRepos(e.target.value)}
+          className="w-full p-2 border rounded-md focus:ring focus:ring-blue-300"
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+        >
           Search
         </button>
       </form>
 
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {/* Results */}
+      {loading && <p className="text-center text-gray-500">Loading...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
 
-      {results && (
-        <div className="border p-4 rounded shadow">
-          <img src={results.avatar_url} alt={results.login} className="w-20 h-20 rounded-full" />
-          <h2 className="text-lg font-bold">{results.name || results.login}</h2>
-          <a href={results.html_url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-            View Profile
-          </a>
-        </div>
-      )}
+      <div className="space-y-4">
+        {users.map((user) => (
+          <div
+            key={user.id}
+            className="flex items-center bg-white shadow rounded-lg p-4"
+          >
+            <img
+              src={user.avatar_url}
+              alt={user.login}
+              className="w-16 h-16 rounded-full mr-4"
+            />
+            <div>
+              <h3 className="text-lg font-bold">{user.login}</h3>
+              <a
+                href={user.html_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                View Profile
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
