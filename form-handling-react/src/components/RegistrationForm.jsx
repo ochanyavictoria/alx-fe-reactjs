@@ -1,24 +1,15 @@
 import { useState } from "react";
 
 export default function RegistrationForm() {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
-
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!formData.username || !formData.email || !formData.password) {
+    if (!username || !email || !password) {
       setError("All fields are required!");
       return;
     }
@@ -26,11 +17,10 @@ export default function RegistrationForm() {
     setError("");
 
     try {
-      // Mock API endpoint
       const res = await fetch("https://jsonplaceholder.typicode.com/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ username, email, password }),
       });
 
       const data = await res.json();
@@ -43,7 +33,10 @@ export default function RegistrationForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-4 border rounded">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-md mx-auto p-4 border rounded"
+    >
       <h2 className="text-xl font-bold">Register</h2>
 
       {error && <p className="text-red-500">{error}</p>}
@@ -52,8 +45,8 @@ export default function RegistrationForm() {
         type="text"
         name="username"
         placeholder="Username"
-        value={formData.username}
-        onChange={handleChange}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         className="w-full p-2 border rounded"
       />
 
@@ -61,8 +54,8 @@ export default function RegistrationForm() {
         type="email"
         name="email"
         placeholder="Email"
-        value={formData.email}
-        onChange={handleChange}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         className="w-full p-2 border rounded"
       />
 
@@ -70,12 +63,15 @@ export default function RegistrationForm() {
         type="password"
         name="password"
         placeholder="Password"
-        value={formData.password}
-        onChange={handleChange}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
         className="w-full p-2 border rounded"
       />
 
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+      >
         Register
       </button>
     </form>
